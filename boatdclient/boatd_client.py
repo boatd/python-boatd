@@ -89,7 +89,7 @@ class Boat(object):
         return Wind(
             Bearing(content.get('direction')),
             content.get('speed'),
-            Bearing(content.get('direction')) - self.heading
+            Bearing(content.get('direction')) + self.heading
         )
 
     @property
