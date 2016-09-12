@@ -6,6 +6,7 @@ except ImportError:
     from urllib2 import urlopen, Request
 
 from collections import namedtuple
+from functools import wraps
 import json
 
 from .bearing import Bearing
@@ -60,13 +61,28 @@ class Boatd(object):
 class Boat(object):
     '''A boat controlled by boatd'''
 
-    def __init__(self, boatd=None):
+    def __init__(self, boatd=None, auto_update=True):
         if boatd is None:
             self.boatd = Boatd()
         else:
             self.boatd = boatd
 
+        self.auto_update = auto_update
+        self._cached_boat = {}
+
+    def _auto_update(f):
+        @wraps(f)
+        def dec(self) :
+            if self.auto_update:
+                self.update()
+            return f(self)
+        return dec
+
+    def update(self):
+        self._cached_boat = self.boatd.get('/boat')
+
     @property
+    @_auto_update
     def heading(self):
         '''
         Return the current heading of the boat in degrees.
@@ -74,10 +90,11 @@ class Boat(object):
         :returns: current bearing
         :rtype: Bearing
         '''
-        content = self.boatd.get('/boat')
+        content = self._cached_boat
         return Bearing(float(content.get('heading')))
 
     @property
+    @_auto_update
     def wind(self):
         '''
         Return the direction of the wind in degrees.
@@ -85,7 +102,7 @@ class Boat(object):
         :returns: wind object containing direction bearing and speed
         :rtype: Wind
         '''
-        content = self.boatd.get('/wind')
+        content = self._cached_boat.get('wind')
         return Wind(
             Bearing(content.get('direction')),
             content.get('speed'),
@@ -104,6 +121,7 @@ class Boat(object):
         return self.wind.direction
 
     @property
+    @_auto_update
     def position(self):
         '''
         Return the current position of the boat.
@@ -111,7 +129,7 @@ class Boat(object):
         :returns: current position
         :rtype: Point
         '''
-        content = self.boatd.get('/boat')
+        content = self._cached_boat
         lat, lon = content.get('position')
         return Point(lat, lon)
 
