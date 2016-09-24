@@ -54,7 +54,7 @@ class Boatd(object):
     @property
     def version(self):
         '''Return the version of boatd'''
-        content = self.boatd.get('/')
+        content = self.get('/')
         return content.get('boatd').get('version')
 
 
