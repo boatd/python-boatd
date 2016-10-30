@@ -59,7 +59,11 @@ class Boatd(object):
 
 
 class Boat(object):
-    '''A boat controlled by boatd'''
+    '''
+    A boat controlled by boatd
+    
+    :param auto_update: automatically update properties when they are requested.
+    '''
 
     def __init__(self, boatd=None, auto_update=True):
         if boatd is None:
