@@ -20,10 +20,16 @@ import argparse
 import sys
 
 from boatdclient import Boat
+from boatdclient import Boatd
 from boatdclient import Behaviour
 
 if __name__ == '__main__':
     arger = argparse.ArgumentParser()
+    arger.add_argument('--host', default='localhost',
+                        help='host boatd is listening on')
+    arger.add_argument('--port', type=int, default=2222,
+                        help='port boatd is listening on')
+
     subparsers = arger.add_subparsers(dest='command')
 
     help_parser = subparsers.add_parser('help')
@@ -47,7 +53,8 @@ if __name__ == '__main__':
 
     opts = arger.parse_args()
 
-    boat = Boat()
+    boatd = Boatd(host=opts.host, port=opts.port)
+    boat = Boat(boatd=boatd)
 
     if opts.command == 'help':
         print(__doc__)
